@@ -18,28 +18,24 @@ export default function App() {
             <div className="logo-text">Hemo<span>Learn</span></div>
           </div>
           <div className="nav-tabs">
-            {[
-              ["home", "Home"],
-              ["lab", "🧬 Compat Lab"],
-              ["crisis", "📊 Crisis Data"],
-              ["cases", "🏥 Cases", "2"],
-            ].map(([id, label, badge]) => (
-              <button key={id} className={`nav-tab ${tab === id ? "on" : ""}`} onClick={() => setTab(id)}>
+            {[["home","Home"],["lab","🧬 Compat Lab"],["crisis","📊 Crisis Data"],["cases","🏥 Cases","8"]].map(([id,label,badge]) => (
+              <button key={id} className={`nav-tab ${tab===id?"on":""}`} onClick={() => setTab(id)}>
                 {label}{badge && <span className="nav-badge">{badge}</span>}
               </button>
             ))}
           </div>
         </nav>
 
-        <main className="content">
-          {tab === "home" && <Hero onStart={t => setTab(t)} />}
-          {tab === "lab" && <CompatLab />}
-          {tab === "crisis" && <CrisisDash />}
-          {tab === "cases" && <CaseSim />}
+        <main>
+          {tab==="home"   && <Hero onStart={t => setTab(t)} />}
+          {tab==="lab"    && <CompatLab />}
+          {tab==="crisis" && <CrisisDash />}
+          {tab==="cases"  && <CaseSim />}
         </main>
 
         <footer className="footer">
-          HemoLearn · DSH Hacks V1 · AI × STEM Education · 2026
+          <span>HemoLearn</span> · DSH Hacks V1 · AI × STEM Education ·
+          Real data from Karachi & 30 countries worldwide · 2026
         </footer>
       </div>
     </div>
