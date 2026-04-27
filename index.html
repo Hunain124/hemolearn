@@ -1,13 +1,1157 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>hemolearn</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>HemoLearn — AI Blood Science Education</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Exo+2:ital,wght@0,300;0,400;0,600;0,800;1,300&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blood:#8b0000;--blood2:#c0392b;--blood3:#e74c3c;--blood-glow:rgba(200,30,30,0.35);
+  --cyber:#00fff0;--cyber2:#00c8c8;--cyber-glow:rgba(0,255,240,0.2);
+  --void:#04040a;--void2:#080812;--void3:#0d0d1e;--void4:#111128;--void5:#161635;
+  --grid:rgba(0,255,240,0.04);--gridl:rgba(0,255,240,0.08);
+  --text:#e8e8ff;--text2:#8888bb;--text3:#444477;
+  --disp:'Rajdhani',sans-serif;--mono:'Share Tech Mono',monospace;--body:'Exo 2',sans-serif;
+}
+html{scroll-behavior:smooth}
+body{background:var(--void);color:var(--text);font-family:var(--body);min-height:100vh;overflow-x:hidden;cursor:default}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--blood2);border-radius:2px}
+
+/* SCANLINE OVERLAY */
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px);pointer-events:none;z-index:9999}
+
+/* CANVAS */
+#vein-canvas{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:0.6}
+
+/* GRID BG */
+.grid-bg{
+  position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:
+    linear-gradient(var(--grid) 1px,transparent 1px),
+    linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:60px 60px;
+  mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 40%,transparent 100%);
+}
+
+/* CONTENT */
+.app{position:relative;z-index:1}
+
+/* NAV */
+.nav{
+  position:sticky;top:0;z-index:500;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 2rem;height:62px;
+  background:rgba(4,4,10,0.92);backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(0,255,240,0.1);
+}
+.nav::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--cyber),transparent)}
+.logo{display:flex;align-items:center;gap:12px;cursor:pointer;text-decoration:none}
+.logo-mark{
+  position:relative;width:36px;height:36px;
+  border:1.5px solid var(--blood2);border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(139,0,0,0.15);overflow:hidden;
+}
+.logo-mark::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(192,57,43,0.3),transparent)}
+.logo-mark-h{font-family:var(--disp);font-size:1.3rem;font-weight:700;color:var(--blood3);position:relative;z-index:1}
+.logo-name{font-family:var(--disp);font-size:1.5rem;font-weight:700;letter-spacing:3px;text-transform:uppercase}
+.logo-name .hl{color:var(--blood3)}.logo-name .lr{color:var(--cyber)}
+.nav-right{display:flex;gap:2px;background:var(--void3);border:1px solid rgba(0,255,240,0.08);border-radius:8px;padding:3px}
+.ntab{
+  padding:7px 15px;border-radius:5px;border:none;cursor:pointer;
+  font-family:var(--mono);font-size:0.72rem;letter-spacing:1px;text-transform:uppercase;
+  color:var(--text3);background:transparent;transition:all .2s;position:relative;
+}
+.ntab:hover{color:var(--cyber2)}
+.ntab.on{background:var(--void5);color:var(--cyber);border:1px solid rgba(0,255,240,0.15)}
+.ntab.on::after{content:'';position:absolute;bottom:2px;left:50%;transform:translateX(-50%);width:16px;height:1px;background:var(--cyber)}
+.nbadge{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;font-size:0.58rem;background:var(--blood2);color:#fff;margin-left:5px}
+
+/* HERO */
+.hero{
+  min-height:93vh;display:flex;align-items:center;justify-content:center;
+  padding:4rem 2rem;position:relative;overflow:hidden;
+  background:radial-gradient(ellipse 70% 50% at 50% 0%,rgba(139,0,0,0.12) 0%,transparent 65%);
+}
+.hero-inner{text-align:center;max-width:900px;position:relative;z-index:2}
+.h-eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:5px 16px;border-radius:2px;margin-bottom:2.5rem;
+  border:1px solid rgba(0,255,240,0.2);background:rgba(0,255,240,0.03);
+  font-family:var(--mono);font-size:0.68rem;color:var(--cyber2);letter-spacing:2px;text-transform:uppercase;
+}
+.h-eyebrow-dot{width:5px;height:5px;border-radius:50%;background:var(--cyber);box-shadow:0 0 8px var(--cyber);animation:cyberpulse 2s infinite}
+@keyframes cyberpulse{0%,100%{opacity:1;box-shadow:0 0 8px var(--cyber)}50%{opacity:.4;box-shadow:0 0 2px var(--cyber)}}
+
+.h-title{font-family:var(--disp);font-size:clamp(4rem,10vw,8.5rem);font-weight:700;line-height:.9;letter-spacing:6px;text-transform:uppercase}
+.h-title .line1{color:var(--text3);display:block}
+.h-title .line2{display:block;position:relative}
+.h-title .line2-text{
+  background:linear-gradient(90deg,var(--blood2),var(--blood3),#ff6b6b,var(--blood2));
+  background-size:200% auto;
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  animation:bloodflow 4s linear infinite;
+}
+@keyframes bloodflow{0%{background-position:0% center}100%{background-position:200% center}}
+.h-title .line3{color:var(--cyber);display:block;text-shadow:0 0 30px var(--cyber-glow)}
+
+.h-sub{font-family:var(--body);font-size:1.05rem;font-weight:300;color:var(--text2);line-height:1.8;max-width:560px;margin:2rem auto 0;letter-spacing:.3px}
+.h-sub strong{color:var(--text);font-weight:600}
+
+.h-btns{display:flex;gap:12px;justify-content:center;margin-top:2.5rem;flex-wrap:wrap}
+.btn-blood{
+  padding:13px 32px;border:1px solid var(--blood2);border-radius:3px;cursor:pointer;
+  background:rgba(139,0,0,0.2);color:var(--text);font-family:var(--mono);
+  font-size:0.78rem;letter-spacing:2px;text-transform:uppercase;
+  transition:all .25s;position:relative;overflow:hidden;
+}
+.btn-blood::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(192,57,43,0.3),transparent);opacity:0;transition:.25s}
+.btn-blood:hover{border-color:var(--blood3);box-shadow:0 0 25px var(--blood-glow),inset 0 0 20px rgba(192,57,43,0.1);transform:translateY(-1px)}
+.btn-blood:hover::before{opacity:1}
+.btn-cyber{
+  padding:13px 32px;border:1px solid rgba(0,255,240,0.25);border-radius:3px;cursor:pointer;
+  background:rgba(0,255,240,0.04);color:var(--cyber2);font-family:var(--mono);
+  font-size:0.78rem;letter-spacing:2px;text-transform:uppercase;transition:all .25s;
+}
+.btn-cyber:hover{border-color:var(--cyber);box-shadow:0 0 20px var(--cyber-glow);color:var(--cyber)}
+
+.h-kpis{display:flex;margin-top:4rem;border:1px solid rgba(0,255,240,0.1);border-radius:3px;overflow:hidden;background:rgba(8,8,18,0.8)}
+.kpi{padding:1.4rem 2rem;text-align:center;border-right:1px solid rgba(0,255,240,0.07);flex:1;position:relative}
+.kpi:last-child{border-right:none}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,255,240,0.2),transparent)}
+.kpi-n{font-family:var(--disp);font-size:2.2rem;font-weight:700;letter-spacing:2px;line-height:1}
+.kpi-n.blood{color:var(--blood3);text-shadow:0 0 20px var(--blood-glow)}
+.kpi-n.cyber{color:var(--cyber);text-shadow:0 0 20px var(--cyber-glow)}
+.kpi-n.dim{color:var(--text2)}
+.kpi-l{font-family:var(--mono);font-size:0.62rem;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;margin-top:5px}
+
+/* PAGE */
+.page{padding:2.5rem 2rem 5rem;max-width:1200px;margin:0 auto}
+.pg-head{margin-bottom:2.5rem;padding-bottom:1.5rem;border-bottom:1px solid rgba(0,255,240,0.07)}
+.pg-title{font-family:var(--disp);font-size:2.5rem;font-weight:700;letter-spacing:4px;text-transform:uppercase;line-height:1;display:flex;align-items:center;gap:14px}
+.pg-title .t-blood{color:var(--blood3);text-shadow:0 0 20px var(--blood-glow)}
+.pg-title .t-cyber{color:var(--cyber);text-shadow:0 0 15px var(--cyber-glow)}
+.pg-title .t-dim{color:var(--text3)}
+.pg-sub{color:var(--text3);font-family:var(--mono);font-size:.72rem;line-height:1.65;margin-top:.75rem;letter-spacing:.5px}
+
+/* PANEL */
+.panel{
+  background:rgba(8,8,18,0.85);backdrop-filter:blur(12px);
+  border:1px solid rgba(0,255,240,0.08);border-radius:4px;
+  position:relative;overflow:hidden;transition:border-color .25s;
+}
+.panel:hover{border-color:rgba(0,255,240,0.15)}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,255,240,0.15),transparent)}
+.panel-head{padding:.85rem 1.25rem;border-bottom:1px solid rgba(0,255,240,0.07);display:flex;align-items:center;gap:10px;background:rgba(0,255,240,0.02)}
+.ph-dot{width:6px;height:6px;border-radius:50%;background:var(--blood3);box-shadow:0 0 8px var(--blood-glow);animation:cyberpulse 2s infinite}
+.ph-label{font-family:var(--mono);font-size:.65rem;color:var(--text3);text-transform:uppercase;letter-spacing:2px}
+.ph-label .accent{color:var(--cyber2)}
+.panel-body{padding:1.25rem}
+
+/* SECTION LABEL */
+.slbl{font-family:var(--mono);font-size:.62rem;color:var(--text3);text-transform:uppercase;letter-spacing:2px;margin-bottom:.9rem;display:flex;align-items:center;gap:8px}
+.slbl::before{content:'//';color:var(--blood2)}
+.slbl::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(0,255,240,0.1),transparent)}
+
+/* BLOOD GROUP BUTTONS */
+.bg-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.bgb{
+  aspect-ratio:1;border-radius:3px;
+  border:1px solid rgba(0,255,240,0.1);background:rgba(13,13,30,0.8);
+  color:var(--text3);font-family:var(--disp);font-size:1.15rem;font-weight:700;letter-spacing:1px;
+  cursor:pointer;transition:all .2s;position:relative;overflow:hidden;
+}
+.bgb::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(192,57,43,0.2),transparent);opacity:0;transition:.2s}
+.bgb:hover{border-color:rgba(192,57,43,0.5);color:var(--text)}
+.bgb:hover::after{opacity:1}
+.bgb.active{border-color:var(--blood2);color:var(--blood3);background:rgba(139,0,0,0.2);box-shadow:0 0 16px var(--blood-glow),inset 0 0 12px rgba(192,57,43,0.08)}
+.bgb.active::after{opacity:1}
+
+/* RESULT BANNER */
+.result-strip{
+  padding:1rem 1.25rem;margin:1rem 0;border-radius:3px;
+  display:flex;align-items:center;gap:14px;border:1px solid;
+  font-family:var(--disp);font-size:1.4rem;font-weight:700;letter-spacing:3px;
+}
+.result-strip.ok{border-color:rgba(0,255,128,0.35);background:rgba(0,255,128,0.05);color:#00ff80}
+.result-strip.ok .rs-icon::before{content:'▲ COMPATIBLE';color:#00ff80;text-shadow:0 0 15px rgba(0,255,128,0.5)}
+.result-strip.no{border-color:rgba(192,57,43,0.45);background:rgba(139,0,0,0.1);color:var(--blood3)}
+.result-strip.no .rs-icon::before{content:'■ INCOMPATIBLE';color:var(--blood3);text-shadow:0 0 15px var(--blood-glow)}
+.rs-detail{font-family:var(--mono);font-size:.68rem;color:var(--text3);margin-top:4px;letter-spacing:1px}
+
+/* FACT BAR */
+.fact-bar{padding:.8rem 1rem;margin:.8rem 0;border-radius:2px;background:rgba(192,57,43,0.06);border-left:2px solid var(--blood2);font-family:var(--mono);font-size:.72rem;color:var(--text2);line-height:1.65}
+.fact-bar strong{color:var(--blood3)}
+
+/* CHIPS */
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{padding:3px 10px;border-radius:2px;font-family:var(--mono);font-size:.68rem;letter-spacing:.5px;border:1px solid}
+.chip.g{color:#00ff80;border-color:rgba(0,255,128,0.3);background:rgba(0,255,128,0.05)}
+.chip.b{color:var(--blood3);border-color:rgba(192,57,43,0.3);background:rgba(139,0,0,0.08)}
+.chip.c{color:var(--cyber2);border-color:rgba(0,255,240,0.2);background:rgba(0,255,240,0.04)}
+.chip.dim{color:var(--text3);border-color:rgba(255,255,255,0.08);background:transparent;opacity:.5}
+
+/* AI PANEL */
+.ai-panel{border-radius:3px;border:1px solid rgba(192,57,43,0.2);overflow:hidden;background:rgba(4,4,12,0.9);margin-top:1rem}
+.ai-head{padding:.75rem 1rem;border-bottom:1px solid rgba(192,57,43,0.15);display:flex;align-items:center;gap:8px;background:rgba(139,0,0,0.08)}
+.ai-pulse{width:6px;height:6px;border-radius:50%;background:var(--blood3);animation:cyberpulse 1.5s infinite}
+.ai-lbl{font-family:var(--mono);font-size:.62rem;color:var(--text3);text-transform:uppercase;letter-spacing:2px}
+.ai-lbl .ac{color:var(--blood3)}
+.ai-body{padding:1rem;font-family:var(--body);font-size:.84rem;line-height:1.78;color:var(--text2);min-height:80px;white-space:pre-wrap}
+.ai-body.loading{color:var(--text3);font-style:italic;font-family:var(--mono);font-size:.72rem}
+
+/* XBTN */
+.xbtn{
+  width:100%;padding:11px;border-radius:2px;margin-top:.75rem;
+  border:1px solid rgba(192,57,43,0.35);background:rgba(139,0,0,0.1);
+  color:var(--blood3);font-family:var(--mono);font-size:.72rem;letter-spacing:2px;text-transform:uppercase;
+  cursor:pointer;transition:all .2s;
+}
+.xbtn:hover:not(:disabled){border-color:var(--blood2);background:rgba(139,0,0,0.2);box-shadow:0 0 18px var(--blood-glow)}
+.xbtn:disabled{opacity:.3;cursor:not-allowed}
+
+/* CHAT */
+.chat-wrap{display:flex;flex-direction:column;height:100%;min-height:460px}
+.chat-msgs{flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:10px;min-height:360px}
+.msg{max-width:90%;padding:9px 13px;border-radius:3px;font-family:var(--body);font-size:.83rem;line-height:1.65}
+.msg.u{align-self:flex-end;background:rgba(139,0,0,0.15);border:1px solid rgba(192,57,43,0.3);color:var(--text);border-bottom-right-radius:0}
+.msg.a{align-self:flex-start;background:var(--void3);border:1px solid rgba(0,255,240,0.1);color:var(--text2);border-bottom-left-radius:0}
+.msg.typing{color:var(--text3);font-family:var(--mono);font-size:.7rem;font-style:italic}
+.chat-foot{padding:.9rem;border-top:1px solid rgba(0,255,240,0.07);display:flex;gap:8px}
+.chat-inp{
+  flex:1;padding:9px 13px;border-radius:2px;
+  border:1px solid rgba(0,255,240,0.12);background:var(--void3);
+  color:var(--text);font-family:var(--mono);font-size:.75rem;letter-spacing:.5px;outline:none;transition:.2s;
+}
+.chat-inp::placeholder{color:var(--text3)}
+.chat-inp:focus{border-color:rgba(0,255,240,0.3);box-shadow:0 0 12px rgba(0,255,240,0.06)}
+.chat-send{
+  padding:9px 18px;border-radius:2px;border:1px solid rgba(192,57,43,0.4);
+  background:rgba(139,0,0,0.15);color:var(--blood3);
+  font-family:var(--mono);font-size:.72rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all .2s;
+}
+.chat-send:hover:not(:disabled){background:rgba(139,0,0,0.28);box-shadow:0 0 14px var(--blood-glow)}
+.chat-send:disabled{opacity:.3;cursor:not-allowed}
+
+/* LAYOUTS */
+.lab-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem}
+.crisis-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:1.25rem}
+.case-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem}
+@media(max-width:900px){.lab-grid,.crisis-grid,.case-grid{grid-template-columns:1fr}}
+@media(max-width:640px){.h-kpis{flex-wrap:wrap}.kpi{min-width:50%;border-right:none!important;border-bottom:1px solid rgba(0,255,240,0.07)}.ntab span{display:none}}
+
+/* WORLD MAP */
+.map-wrap{position:relative;width:100%;height:420px;border-radius:4px;overflow:hidden;border:1px solid rgba(0,255,240,0.1);background:var(--void2);margin-bottom:1.25rem}
+#world-canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.map-tip{
+  position:absolute;pointer-events:none;
+  background:rgba(4,4,14,0.96);backdrop-filter:blur(12px);
+  border:1px solid rgba(0,255,240,0.2);border-radius:3px;
+  padding:9px 13px;font-size:.78rem;white-space:nowrap;
+  box-shadow:0 4px 24px rgba(0,0,0,.6);z-index:50;opacity:0;transition:opacity .1s;
+}
+.map-tip-name{font-family:var(--disp);font-size:.95rem;font-weight:700;letter-spacing:1px;margin-bottom:4px}
+.map-tip-row{font-family:var(--mono);font-size:.68rem;color:var(--text3);margin-top:2px;display:flex;align-items:center;gap:6px}
+.tip-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.map-legend{position:absolute;bottom:10px;right:12px;display:flex;flex-direction:column;gap:5px}
+.legend-row{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:.62rem;color:var(--text3)}
+.leg-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/* CRISIS BARS */
+.cbar{display:flex;align-items:center;gap:10px;padding:5px 4px;border-bottom:1px solid rgba(0,255,240,0.04);cursor:pointer;border-radius:2px;transition:background .15s}
+.cbar:last-child{border-bottom:none}
+.cbar:hover,.cbar.sel{background:rgba(139,0,0,0.06)}
+.cbar-flag{font-size:.95rem;width:22px;text-align:center;flex-shrink:0}
+.cbar-name{width:88px;font-family:var(--mono);font-size:.7rem;color:var(--text2);flex-shrink:0;letter-spacing:.5px}
+.cbar-track{flex:1;height:22px;background:var(--void3);border-radius:2px;overflow:hidden}
+.cbar-fill{height:100%;border-radius:2px;display:flex;align-items:center;padding:0 7px;transition:width 1.3s cubic-bezier(.16,1,.3,1)}
+.cbar-pct{font-family:var(--mono);font-size:.65rem;color:rgba(255,255,255,.8);letter-spacing:.5px}
+.cbar-need{width:68px;text-align:right;font-family:var(--mono);font-size:.62rem;color:var(--text3);flex-shrink:0}
+
+/* REGION FILTER */
+.rfilter{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:1rem}
+.rfbtn{padding:4px 12px;border-radius:2px;border:1px solid rgba(0,255,240,0.08);background:var(--void3);color:var(--text3);font-family:var(--mono);font-size:.65rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .15s}
+.rfbtn:hover{color:var(--cyber2);border-color:rgba(0,255,240,0.2)}
+.rfbtn.on{background:rgba(0,255,240,0.05);color:var(--cyber);border-color:rgba(0,255,240,0.25)}
+
+/* SELECTED COUNTRY CARD */
+.sel-card{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:1rem 1.25rem;margin-bottom:1.25rem;border-radius:3px;border:1px solid;background:rgba(4,4,14,0.9);transition:border-color .3s}
+.sel-flag{font-size:2rem}
+.sel-meta .sel-name{font-family:var(--disp);font-size:1.6rem;font-weight:700;letter-spacing:2px}
+.sel-meta .sel-region{font-family:var(--mono);font-size:.62rem;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px}
+.sel-shortage{margin-left:auto;text-align:right}
+.sel-pct{font-family:var(--disp);font-size:2.4rem;font-weight:700;letter-spacing:2px;line-height:1}
+.sel-pct-lbl{font-family:var(--mono);font-size:.62rem;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase}
+.sel-stats{display:flex;gap:8px;flex-wrap:wrap;margin-left:auto}
+.ssel{padding:.6rem .9rem;background:var(--void3);border-radius:2px;border:1px solid rgba(0,255,240,0.07);text-align:center}
+.ssel-l{font-family:var(--mono);font-size:.58rem;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+.ssel-v{font-family:var(--disp);font-size:1.2rem;font-weight:700;letter-spacing:1px;line-height:1.2}
+
+/* CASES */
+.diff-tag{display:inline-block;padding:3px 9px;border-radius:2px;font-family:var(--mono);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase}
+.diff-tag.b{color:#00ff80;border:1px solid rgba(0,255,128,0.3);background:rgba(0,255,128,0.06)}
+.diff-tag.i{color:var(--blood3);border:1px solid rgba(192,57,43,0.3);background:rgba(139,0,0,0.08)}
+.diff-tag.a{color:var(--cyber);border:1px solid rgba(0,255,240,0.25);background:rgba(0,255,240,0.04)}
+.case-q{font-family:var(--body);font-size:.97rem;font-weight:400;line-height:1.8;color:var(--text);margin:1.2rem 0}
+.opt{
+  width:100%;padding:12px 14px;border-radius:2px;text-align:left;
+  border:1px solid rgba(0,255,240,0.08);background:var(--void3);
+  color:var(--text2);font-family:var(--body);font-size:.86rem;cursor:pointer;
+  transition:all .18s;margin-bottom:7px;line-height:1.45;display:flex;align-items:flex-start;gap:10px;
+}
+.opt:hover:not(:disabled){border-color:rgba(0,255,240,0.2);background:var(--void4);color:var(--text)}
+.opt.correct{border-color:rgba(0,255,128,.5)!important;background:rgba(0,255,128,.07)!important;color:#00ff80!important}
+.opt.wrong{border-color:rgba(192,57,43,.5)!important;background:rgba(139,0,0,.1)!important;color:var(--blood3)!important}
+.opt:disabled{cursor:default}
+.opt-key{flex-shrink:0;width:20px;height:20px;border-radius:2px;background:var(--void5);border:1px solid rgba(0,255,240,0.1);font-family:var(--mono);font-size:.62rem;font-weight:700;display:flex;align-items:center;justify-content:center;color:var(--text3);margin-top:1px}
+.explanation{padding:1rem 1.1rem;border-radius:2px;margin-top:.9rem;background:rgba(0,255,128,.04);border:1px solid rgba(0,255,128,.18);font-family:var(--body);font-size:.84rem;line-height:1.75;color:var(--text2)}
+.explanation strong{color:#00ff80}
+.case-footer{display:flex;align-items:center;justify-content:space-between;margin-top:1.2rem}
+.case-nav-btn{padding:8px 18px;border-radius:2px;border:1px solid rgba(0,255,240,0.1);background:var(--void3);color:var(--text3);font-family:var(--mono);font-size:.68rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.case-nav-btn:hover:not(:disabled){border-color:rgba(0,255,240,0.25);color:var(--cyber2)}
+.case-nav-btn:disabled{opacity:.25;cursor:not-allowed}
+.score-display{font-family:var(--mono);font-size:.75rem;color:var(--text3);padding:6px 14px;border:1px solid rgba(0,255,240,0.08);border-radius:2px}
+.score-display strong{color:var(--cyber)}
+.progress-dots{display:flex;gap:5px;flex-wrap:wrap}
+.pdot{width:8px;height:8px;border-radius:50%;background:var(--void4);border:1px solid rgba(0,255,240,0.12);transition:all .3s;cursor:pointer}
+.pdot.done{background:#00ff80;border-color:#00ff80;box-shadow:0 0 6px rgba(0,255,128,.5)}
+.pdot.cur{background:var(--blood3);border-color:var(--blood2);box-shadow:0 0 8px var(--blood-glow)}
+.pdot.wrong-done{background:var(--blood2);border-color:var(--blood2);opacity:.45}
+
+/* STATS */
+.stat-big{font-family:var(--disp);font-size:2.8rem;font-weight:700;letter-spacing:2px;line-height:1}
+.stat-big.blood{color:var(--blood3);text-shadow:0 0 20px var(--blood-glow)}
+.stat-big.cyber{color:var(--cyber);text-shadow:0 0 15px var(--cyber-glow)}
+.stat-lbl{font-family:var(--mono);font-size:.62rem;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;margin-top:4px}
+.divider{height:1px;background:rgba(0,255,240,0.06);margin:.9rem 0}
+
+/* DEFICIT BOX */
+.deficit-box{padding:.9rem;border-radius:2px;border:1px solid rgba(192,57,43,0.2);background:rgba(139,0,0,0.08);margin-top:1rem}
+
+/* FOOTER */
+.footer{border-top:1px solid rgba(0,255,240,0.07);padding:2rem;text-align:center;font-family:var(--mono);font-size:.65rem;color:var(--text3);letter-spacing:1px;margin-top:2rem}
+.footer .blood-txt{color:var(--blood2)}
+.footer .cyber-txt{color:var(--cyber2)}
+</style>
+</head>
+<body>
+<canvas id="vein-canvas"></canvas>
+<div class="grid-bg"></div>
+
+<div class="app">
+  <nav class="nav">
+    <div class="logo" onclick="goTab('home')">
+      <div class="logo-mark"><span class="logo-mark-h">H</span></div>
+      <div class="logo-name"><span class="hl">HEMO</span><span class="lr">LEARN</span></div>
+    </div>
+    <div class="nav-right">
+      <button class="ntab on" data-tab="home" onclick="goTab('home')">HOME</button>
+      <button class="ntab" data-tab="lab" onclick="goTab('lab')">🧬 LAB</button>
+      <button class="ntab" data-tab="crisis" onclick="goTab('crisis')">📡 CRISIS</button>
+      <button class="ntab" data-tab="cases" onclick="goTab('cases')">🏥 CASES <span class="nbadge">8</span></button>
+    </div>
+  </nav>
+
+  <main id="main-content"></main>
+
+  <footer class="footer">
+    <span class="blood-txt">HEMO</span><span class="cyber-txt">LEARN</span> · DSH HACKS V1 · AI × STEM EDUCATION · REAL DATA FROM KARACHI & 30 COUNTRIES · 2026
+  </footer>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════════
+const BLOOD_GROUPS = ["A+","A-","B+","B-","AB+","AB-","O+","O-"];
+const COMPAT = {
+  "A+": {recv:["A+","A-","O+","O-"],          give:["A+","AB+"]},
+  "A-": {recv:["A-","O-"],                    give:["A+","A-","AB+","AB-"]},
+  "B+": {recv:["B+","B-","O+","O-"],          give:["B+","AB+"]},
+  "B-": {recv:["B-","O-"],                    give:["B+","B-","AB+","AB-"]},
+  "AB+":{recv:["A+","A-","B+","B-","AB+","AB-","O+","O-"], give:["AB+"]},
+  "AB-":{recv:["A-","B-","AB-","O-"],         give:["AB+","AB-"]},
+  "O+": {recv:["O+","O-"],                    give:["A+","B+","AB+","O+"]},
+  "O-": {recv:["O-"],                         give:["A+","A-","B+","B-","AB+","AB-","O+","O-"]},
+};
+const FACTS = {
+  "O-":"Universal donor — gives to ALL 8 types. Only 7% of people worldwide.","AB+":"Universal recipient — receives from ALL 8 types.","O+":"Most common globally (38%). Needed every 2 seconds in emergencies.","A+":"Second most common (34%). High demand for platelet donation.","B+":"9% of population. Critical for South Asian communities.","AB-":"Rarest type (1%). Universal plasma donor for burn victims.","A-":"6% of population. Vital for premature babies.","B-":"2% of population. Extreme chronic worldwide shortage.",
+};
+const CRISIS = [
+  {c:"Pakistan",   f:"🇵🇰",s:88,need:1.8, have:0.22,lat:30.3, lng:69.3},
+  {c:"Ethiopia",   f:"🇪🇹",s:91,need:0.6, have:0.05,lat:9.1,  lng:40.5},
+  {c:"Nigeria",    f:"🇳🇬",s:82,need:1.2, have:0.22,lat:9.1,  lng:8.7},
+  {c:"Bangladesh", f:"🇧🇩",s:75,need:0.9, have:0.23,lat:23.7, lng:90.4},
+  {c:"DR Congo",   f:"🇨🇩",s:89,need:0.7, have:0.08,lat:-4.0, lng:21.8},
+  {c:"Tanzania",   f:"🇹🇿",s:85,need:0.45,have:0.07,lat:-6.4, lng:34.9},
+  {c:"Uganda",     f:"🇺🇬",s:83,need:0.38,have:0.06,lat:1.4,  lng:32.3},
+  {c:"Mozambique", f:"🇲🇿",s:86,need:0.31,have:0.04,lat:-18.7,lng:35.5},
+  {c:"Myanmar",    f:"🇲🇲",s:71,need:0.55,have:0.16,lat:19.2, lng:96.7},
+  {c:"Afghanistan",f:"🇦🇫",s:79,need:0.42,have:0.09,lat:33.9, lng:67.7},
+  {c:"Haiti",      f:"🇭🇹",s:78,need:0.19,have:0.04,lat:18.9, lng:-72.3},
+  {c:"Yemen",      f:"🇾🇪",s:84,need:0.35,have:0.06,lat:15.6, lng:48.5},
+  {c:"Sudan",      f:"🇸🇩",s:80,need:0.48,have:0.10,lat:12.9, lng:30.2},
+  {c:"Cambodia",   f:"🇰🇭",s:62,need:0.28,have:0.11,lat:12.6, lng:104.9},
+  {c:"Bolivia",    f:"🇧🇴",s:57,need:0.32,have:0.14,lat:-16.3,lng:-63.6},
+  {c:"Guatemala",  f:"🇬🇹",s:53,need:0.41,have:0.19,lat:15.8, lng:-90.2},
+  {c:"Indonesia",  f:"🇮🇩",s:55,need:4.5, have:2.0, lat:-0.8, lng:113.9},
+  {c:"Philippines",f:"🇵🇭",s:48,need:1.8, have:0.94,lat:12.9, lng:121.8},
+  {c:"India",      f:"🇮🇳",s:15,need:14.8,have:12.6,lat:20.6, lng:78.9},
+  {c:"Brazil",     f:"🇧🇷",s:8, need:5.5, have:5.1, lat:-14.2,lng:-51.9},
+  {c:"Mexico",     f:"🇲🇽",s:12,need:3.2, have:2.8, lat:23.6, lng:-102.6},
+  {c:"South Africa",f:"🇿🇦",s:22,need:1.9,have:1.48,lat:-30.6,lng:22.9},
+  {c:"Turkey",     f:"🇹🇷",s:9, need:2.8, have:2.55,lat:38.9, lng:35.2},
+  {c:"Iran",       f:"🇮🇷",s:6, need:2.4, have:2.26,lat:32.4, lng:53.7},
+  {c:"China",      f:"🇨🇳",s:4, need:24.0,have:23.0,lat:35.9, lng:104.2},
+  {c:"Japan",      f:"🇯🇵",s:3, need:5.2, have:5.04,lat:36.2, lng:138.3},
+  {c:"UK",         f:"🇬🇧",s:2, need:4.0, have:3.92,lat:55.4, lng:-3.4},
+  {c:"Germany",    f:"🇩🇪",s:1, need:4.2, have:4.16,lat:51.2, lng:10.5},
+  {c:"France",     f:"🇫🇷",s:2, need:3.8, have:3.72,lat:46.2, lng:2.2},
+  {c:"USA",        f:"🇺🇸",s:2, need:6.8, have:6.66,lat:37.1, lng:-95.7},
+];
+const CASES = [
+  {diff:"Beginner", tag:"ABO Compatibility",       q:"Emergency: 7-year-old thalassemia patient (B+) needs blood urgently. Stock: B+, O+, O−. Which do you give first?", opts:["O− — universal donor","B+ — same group, ideal match","O+ — compatible for B+","Any works, no difference"], ans:1, explain:"B+ is the ideal choice — identical ABO group and Rh type eliminates all compatibility risks. O+ works but repeated transfusions risk Rh alloimmunization. O− conserved for blood-type-unknown emergencies."},
+  {diff:"Beginner", tag:"Universal Donor",          q:"Unconscious trauma patient arrives. No time for blood typing. Your protocol?", opts:["Wait 10 minutes for typing","Give AB+ (universal recipient)","Give O− (universal donor)","Give O+ to conserve O−"], ans:2, explain:"O− is the universal donor — safe for ALL 8 blood types without prior testing. In life-threatening emergencies, O− is given immediately. It's the global standard for unknown-type emergency transfusion."},
+  {diff:"Intermediate", tag:"Rh Factor",            q:"Pregnant O− woman. Husband is O+. She's 28 weeks pregnant. What critical intervention is needed?", opts:["Nothing — same ABO group, no risk","Anti-D immunoglobulin (RhoGAM) injection","Emergency C-section preparation","Immediate fetal blood typing"], ans:1, explain:"If baby inherited O+ from father, the mother's immune system creates Anti-D antibodies that cross the placenta and destroy fetal RBCs — Hemolytic Disease of Newborn. RhoGAM at 28 weeks prevents sensitization. This is standard antenatal care worldwide."},
+  {diff:"Intermediate", tag:"Blood Components",     q:"Hemophilia A patient (A+) is actively bleeding. What do you transfuse?", opts:["Whole blood A+","Packed Red Blood Cells (PRBCs)","Fresh Frozen Plasma (FFP) / Factor VIII","Platelet concentrate"], ans:2, explain:"Hemophilia A = Factor VIII deficiency. The treatment is FFP or Factor VIII concentrate — NOT red blood cells. Modern transfusion medicine uses component therapy: each component targets a specific deficiency. Whole blood transfusion is outdated and wasteful."},
+  {diff:"Intermediate", tag:"Crossmatching",        q:"Lab detects an unexpected antibody in an A+ patient before surgery. Next step?", opts:["Transfuse A+ immediately — typing is enough","Full crossmatch with specific donor blood","Give O− to be safe","Cancel transfusion — too risky"], ans:1, explain:"Unexpected alloantibodies form after previous transfusions or pregnancies. A full crossmatch mixes patient serum with donor RBCs to detect reactions BEFORE transfusion. Blood typing alone misses these antibodies — crossmatching is the critical final safety check."},
+  {diff:"Advanced", tag:"Mass Casualty Protocol",   q:"40 trauma patients arrive simultaneously. Stock: 20 O−, 30 O+, limited A+/B+. No typing time. Protocol?", opts:["O− to everyone to be safe","O+ to all adults, O− to children only","O+ to males/older women, O− to females under 50 + children","Type everyone first — 15 minute wait"], ans:2, explain:"O− (rare, universal) is conserved for women of childbearing age and children — Rh sensitization could devastate future pregnancies. O+ is given to males and post-menopausal women. Never delay life-saving transfusion for typing in mass casualty. This is real hospital protocol."},
+  {diff:"Advanced", tag:"Transfusion Reaction",     q:"Minutes after starting transfusion: fever, chills, severe back pain, dark urine. What's happening?", opts:["Allergic reaction — give antihistamine and continue","Febrile non-hemolytic reaction — slow the drip","Acute hemolytic transfusion reaction — STOP IMMEDIATELY","Normal response — monitor and continue"], ans:2, explain:"Dark urine + back pain + fever = ACUTE HEMOLYTIC TRANSFUSION REACTION — a medical emergency. Incompatible RBCs are destroyed intravascularly, releasing hemoglobin into blood and urine. STOP transfusion immediately, aggressive IV fluids to protect kidneys. ABO mismatch can be fatal."},
+  {diff:"Advanced", tag:"Prophylactic Transfusion", q:"Leukemia patient post-chemotherapy: platelets 8,000/μL (normal: 150,000–400,000). Not actively bleeding. Do you transfuse?", opts:["No — transfuse only if actively bleeding","Yes — prophylactic transfusion at <10,000/μL is standard protocol","Yes, but only O+ matched platelets","Wait until count drops to 5,000/μL"], ans:1, explain:"Standard protocol: prophylactic platelet transfusion at <10,000/μL in stable patients (or <20,000 if fever/infection). At 8,000/μL, spontaneous intracranial hemorrhage risk is real even without trauma. ABO matching preferred but not always required in emergencies. This threshold saves thousands of leukemia patients annually."},
+];
+
+// ═══════════════════════════════════════════════════════
+// VEIN CANVAS BACKGROUND
+// ═══════════════════════════════════════════════════════
+(function initCanvas(){
+  const c = document.getElementById('vein-canvas');
+  const ctx = c.getContext('2d');
+  let W, H, cells = [], veins = [], tick = 0;
+  function resize(){ W=c.width=window.innerWidth; H=c.height=window.innerHeight; }
+  function mkCell(){
+    return {
+      x:Math.random()*W, y:Math.random()*H,
+      r:6+Math.random()*20,
+      vx:(Math.random()-.5)*.28, vy:(Math.random()-.5)*.22,
+      phase:Math.random()*Math.PI*2,
+      speed:.007+Math.random()*.009,
+      type:Math.random()<.6?'rbc':Math.random()<.5?'wbc':'plt',
+      alpha:.04+Math.random()*.09, rot:Math.random()*Math.PI*2,
+      rotS:(Math.random()-.5)*.007,
+    };
+  }
+  function mkVein(){
+    return {
+      pts:[], color:Math.random()<.6?'rgba(139,0,0,.08)':'rgba(0,255,240,.04)',
+      width:.6+Math.random()*.8, flow:0, speed:.003+Math.random()*.005,
+    };
+  }
+  function buildVeins(){
+    veins=[];
+    for(let i=0;i<8;i++){
+      const v=mkVein();
+      let x=Math.random()*W, y=Math.random()*H;
+      const steps=6+Math.floor(Math.random()*8);
+      for(let j=0;j<steps;j++){
+        v.pts.push({x,y});
+        x+=( Math.random()-.5)*200; y+=( Math.random()-.5)*150;
+        x=Math.max(0,Math.min(W,x)); y=Math.max(0,Math.min(H,y));
+      }
+      veins.push(v);
+    }
+  }
+  function drawRBC(x,y,r,a,rot){
+    ctx.save(); ctx.translate(x,y); ctx.rotate(rot); ctx.globalAlpha=a;
+    ctx.beginPath(); ctx.ellipse(0,0,r,r*.62,0,0,Math.PI*2);
+    const g=ctx.createRadialGradient(0,0,r*.08,0,0,r);
+    g.addColorStop(0,'rgba(160,18,18,.28)');
+    g.addColorStop(.5,'rgba(192,40,40,.9)');
+    g.addColorStop(1,'rgba(100,8,8,.5)');
+    ctx.fillStyle=g; ctx.fill();
+    ctx.beginPath(); ctx.ellipse(0,0,r*.3,r*.18,0,0,Math.PI*2);
+    ctx.fillStyle='rgba(60,0,0,.4)'; ctx.fill();
+    ctx.restore();
+  }
+  function drawWBC(x,y,r,a){
+    ctx.save(); ctx.globalAlpha=a*.45;
+    ctx.beginPath();
+    const pts=8; 
+    for(let i=0;i<pts;i++){
+      const angle=(i/pts)*Math.PI*2;
+      const nr=r*(.6+Math.sin(angle*3+tick*.01)*.25);
+      i===0?ctx.moveTo(x+Math.cos(angle)*nr,y+Math.sin(angle)*nr):ctx.lineTo(x+Math.cos(angle)*nr,y+Math.sin(angle)*nr);
+    }
+    ctx.closePath();
+    ctx.fillStyle='rgba(80,120,255,.1)'; ctx.fill();
+    ctx.strokeStyle='rgba(80,120,255,.2)'; ctx.lineWidth=.8; ctx.stroke();
+    ctx.restore();
+  }
+  function drawPlatelet(x,y,r,a,rot){
+    ctx.save(); ctx.translate(x,y); ctx.rotate(rot); ctx.globalAlpha=a*.6;
+    ctx.beginPath(); ctx.ellipse(0,0,r*.75,r*.4,0,0,Math.PI*2);
+    ctx.fillStyle='rgba(255,190,70,.18)'; ctx.fill();
+    ctx.strokeStyle='rgba(255,190,70,.35)'; ctx.lineWidth=.7; ctx.stroke();
+    ctx.restore();
+  }
+  function drawVeins(){
+    veins.forEach(v=>{
+      v.flow+=v.speed;
+      if(v.pts.length<2) return;
+      ctx.save(); ctx.lineWidth=v.width;
+      ctx.beginPath(); ctx.moveTo(v.pts[0].x,v.pts[0].y);
+      for(let i=1;i<v.pts.length;i++) ctx.lineTo(v.pts[i].x,v.pts[i].y);
+      ctx.strokeStyle=v.color; ctx.stroke();
+      // Flowing pulse
+      const totalPts=v.pts.length;
+      const pulseIdx=Math.floor((v.flow%1)*totalPts);
+      if(pulseIdx<totalPts){
+        const pt=v.pts[pulseIdx];
+        const pg=ctx.createRadialGradient(pt.x,pt.y,0,pt.x,pt.y,6);
+        pg.addColorStop(0,'rgba(192,57,43,.35)'); pg.addColorStop(1,'rgba(192,57,43,0)');
+        ctx.beginPath(); ctx.arc(pt.x,pt.y,6,0,Math.PI*2);
+        ctx.fillStyle=pg; ctx.fill();
+      }
+      ctx.restore();
+    });
+  }
+  function loop(){
+    tick++;
+    ctx.clearRect(0,0,W,H);
+    drawVeins();
+    cells.forEach(p=>{
+      p.x+=p.vx; p.y+=p.vy; p.rot+=p.rotS;
+      p.phase+=p.speed; p.y+=Math.sin(p.phase)*.2;
+      if(p.x<-p.r*2) p.x=W+p.r; if(p.x>W+p.r) p.x=-p.r*2;
+      if(p.y<-p.r*2) p.y=H+p.r; if(p.y>H+p.r) p.y=-p.r*2;
+      const a=p.alpha*(.65+.35*Math.sin(p.phase*1.4));
+      if(p.type==='rbc') drawRBC(p.x,p.y,p.r,a,p.rot);
+      else if(p.type==='wbc') drawWBC(p.x,p.y,p.r,a);
+      else drawPlatelet(p.x,p.y,p.r,a,p.rot);
+    });
+    requestAnimationFrame(loop);
+  }
+  resize();
+  cells=Array.from({length:22},mkCell);
+  buildVeins();
+  loop();
+  window.addEventListener('resize',()=>{ resize(); buildVeins(); });
+})();
+
+// ═══════════════════════════════════════════════════════
+// CLAUDE API
+// ═══════════════════════════════════════════════════════
+async function askClaude(messages, system){
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system,messages}),
+    });
+    const d=await r.json();
+    return d.content?.[0]?.text||'No response.';
+  }catch(e){ return 'Network error. Please try again.'; }
+}
+
+// ═══════════════════════════════════════════════════════
+// TAB ROUTER
+// ═══════════════════════════════════════════════════════
+let currentTab = 'home';
+function goTab(tab){
+  currentTab=tab;
+  document.querySelectorAll('.ntab').forEach(b=>{ b.classList.toggle('on', b.dataset.tab===tab); });
+  const main=document.getElementById('main-content');
+  main.innerHTML='';
+  gsap.fromTo(main,{opacity:0,y:18},{opacity:1,y:0,duration:.45,ease:'power3.out'});
+  if(tab==='home') renderHero();
+  else if(tab==='lab') renderLab();
+  else if(tab==='crisis') renderCrisis();
+  else if(tab==='cases') renderCases();
+}
+
+// ═══════════════════════════════════════════════════════
+// HERO
+// ═══════════════════════════════════════════════════════
+function renderHero(){
+  const main=document.getElementById('main-content');
+  main.innerHTML=`
+  <div class="hero">
+    <div class="hero-inner">
+      <div class="h-eyebrow"><div class="h-eyebrow-dot"></div>AI × STEM EDUCATION · DSH HACKS V1 · KARACHI ORIGIN</div>
+      <div class="h-title">
+        <span class="line1">LEARN</span>
+        <span class="line2"><span class="line2-text">BLOOD</span></span>
+        <span class="line3">SCIENCE</span>
+      </div>
+      <p class="h-sub">From immunology to emergency medicine — <strong>AI-powered STEM education</strong> built on real clinical data from Karachi and 30 countries worldwide.</p>
+      <div class="h-btns">
+        <button class="btn-blood" onclick="goTab('lab')">[ ENTER LAB ]</button>
+        <button class="btn-cyber" onclick="goTab('crisis')">[ VIEW CRISIS DATA ]</button>
+      </div>
+      <div class="h-kpis">
+        <div class="kpi"><div class="kpi-n blood" id="kpi1">0</div><div class="kpi-l">Blood Groups</div></div>
+        <div class="kpi"><div class="kpi-n cyber" id="kpi2">0</div><div class="kpi-l">Units Needed / Year</div></div>
+        <div class="kpi"><div class="kpi-n dim" id="kpi3">0</div><div class="kpi-l">Countries Tracked</div></div>
+        <div class="kpi"><div class="kpi-n blood" id="kpi4">0%</div><div class="kpi-l">Pakistan Shortage</div></div>
+      </div>
+    </div>
+  </div>`;
+  // GSAP entrance
+  const tl=gsap.timeline({defaults:{ease:'power3.out'}});
+  tl.from('.h-eyebrow',{opacity:0,y:20,duration:.7})
+    .from('.h-title .line1',{opacity:0,x:-40,duration:.6},'-=.4')
+    .from('.h-title .line2',{opacity:0,scaleX:.8,duration:.7,transformOrigin:'left'},'-=.3')
+    .from('.h-title .line3',{opacity:0,x:40,duration:.6},'-=.4')
+    .from('.h-sub',{opacity:0,y:16,duration:.6},'-=.3')
+    .from('.h-btns',{opacity:0,y:16,duration:.5},'-=.3')
+    .from('.h-kpis',{opacity:0,y:16,duration:.5},'-=.3');
+  // Counter animation
+  function countUp(id,target,suffix=''){
+    const el=document.getElementById(id); if(!el) return;
+    const dur=1.5, fps=60, steps=dur*fps;
+    let frame=0;
+    const timer=setInterval(()=>{
+      frame++;
+      const val=Math.round((frame/steps)*target);
+      el.textContent=val+suffix;
+      if(frame>=steps){ el.textContent=target+suffix; clearInterval(timer); }
+    },1000/fps);
+  }
+  setTimeout(()=>{ countUp('kpi1',8); countUp('kpi2',118,'M'); countUp('kpi3',30); countUp('kpi4',88,'%'); },600);
+}
+
+// ═══════════════════════════════════════════════════════
+// COMPATIBILITY LAB
+// ═══════════════════════════════════════════════════════
+let labState = { patient:null, donor:null };
+let chatHistory = [{r:'a',t:'SYSTEM ONLINE. I am HemoLearn AI — your blood science tutor. Select blood groups to analyze compatibility, or ask me anything about hematology, antigens, transfusion reactions, blood genetics...'}];
+
+function renderLab(){
+  const main=document.getElementById('main-content');
+  main.innerHTML=`
+  <div class="page">
+    <div class="pg-head">
+      <div class="pg-title"><span class="t-dim">SYS://</span><span class="t-blood">COMPAT</span><span class="t-dim">_</span><span class="t-cyber">LAB</span></div>
+      <div class="pg-sub">SELECT BLOOD GROUPS → ANALYZE COMPATIBILITY → AI-POWERED IMMUNOLOGY EXPLANATION</div>
+    </div>
+    <div class="lab-grid">
+      <div>
+        <div class="panel" style="padding:1.4rem;margin-bottom:1.2rem">
+          <div class="slbl">Patient Blood Group</div>
+          <div class="bg-grid" id="patient-grid"></div>
+          <div class="slbl" style="margin-top:1.2rem">Donor Blood Group</div>
+          <div class="bg-grid" id="donor-grid"></div>
+          <div id="result-zone"></div>
+          <div id="fact-zone"></div>
+          <div id="compat-zone"></div>
+          <button class="xbtn" id="explain-btn" disabled onclick="runExplain()">// EXPLAIN IMMUNOLOGY WITH AI</button>
+          <div id="ai-explain-zone"></div>
+        </div>
+      </div>
+      <div class="panel chat-wrap">
+        <div class="panel-head">
+          <div class="ph-dot"></div>
+          <div class="ph-label">AI TUTOR · <span class="accent">HEMOLEARN.AI</span></div>
+        </div>
+        <div class="chat-msgs" id="chat-msgs"></div>
+        <div class="chat-foot">
+          <input class="chat-inp" id="chat-input" placeholder="ASK ABOUT BLOOD SCIENCE, GENETICS, ANTIGENS..." onkeydown="if(event.key==='Enter') sendChat()"/>
+          <button class="chat-send" onclick="sendChat()" id="send-btn">SEND ▶</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+  buildBGButtons('patient-grid', 'patient');
+  buildBGButtons('donor-grid', 'donor');
+  renderChatMsgs();
+  restoreLabState();
+  gsap.from('.panel',{opacity:0,y:20,duration:.5,stagger:.1,ease:'power3.out'});
+}
+
+function buildBGButtons(containerId, role){
+  const el=document.getElementById(containerId); if(!el) return;
+  BLOOD_GROUPS.forEach(g=>{
+    const btn=document.createElement('button');
+    btn.className='bgb'; btn.textContent=g; btn.dataset.group=g; btn.dataset.role=role;
+    btn.onclick=()=>selectBG(g,role);
+    el.appendChild(btn);
+  });
+}
+
+function restoreLabState(){
+  if(labState.patient) highlightBG('patient',labState.patient);
+  if(labState.donor) highlightBG('donor',labState.donor);
+  if(labState.patient && labState.donor) updateResult();
+  else if(labState.patient) updateFact();
+}
+
+function selectBG(g,role){
+  if(role==='patient') labState.patient=labState.patient===g?null:g;
+  else labState.donor=labState.donor===g?null:g;
+  highlightBG('patient',labState.patient);
+  highlightBG('donor',labState.donor);
+  updateResult();
+  document.getElementById('explain-btn').disabled=!(labState.patient&&labState.donor);
+}
+
+function highlightBG(role,sel){
+  const grid=document.getElementById(role+'-grid'); if(!grid) return;
+  grid.querySelectorAll('.bgb').forEach(b=>b.classList.toggle('active',b.dataset.group===sel));
+}
+
+function updateResult(){
+  const rz=document.getElementById('result-zone');
+  const fz=document.getElementById('fact-zone');
+  const cz=document.getElementById('compat-zone');
+  if(!rz||!fz||!cz) return;
+  if(!labState.patient&&!labState.donor){ rz.innerHTML=''; fz.innerHTML=''; cz.innerHTML=''; return; }
+  // Fact
+  if(labState.patient){
+    fz.innerHTML=`<div class="fact-bar"><strong>▸ ${labState.patient}</strong> — ${FACTS[labState.patient]}</div>`;
+    const recv=COMPAT[labState.patient].recv;
+    const give=COMPAT[labState.patient].give;
+    cz.innerHTML=`
+      <div class="slbl" style="margin-top:.9rem">Can receive from</div>
+      <div class="chips">${recv.map(g=>`<span class="chip g">${g}</span>`).join('')}</div>
+      <div class="slbl" style="margin-top:.7rem">Can donate to</div>
+      <div class="chips">${give.map(g=>`<span class="chip b">${g}</span>`).join('')}</div>`;
+  }
+  if(labState.patient&&labState.donor){
+    const ok=COMPAT[labState.patient].recv.includes(labState.donor);
+    rz.innerHTML=`
+      <div class="result-strip ${ok?'ok':'no'}">
+        <div class="rs-icon"></div>
+        <div class="rs-detail">${labState.patient} PATIENT ← ${labState.donor} DONOR &nbsp;·&nbsp; ${ok?'SAFE TO TRANSFUSE':'IMMUNE REACTION RISK'}</div>
+      </div>`;
+    gsap.from('.result-strip',{opacity:0,scaleY:.8,duration:.35,ease:'back.out(1.6)',transformOrigin:'top'});
+  } else { rz.innerHTML=''; }
+}
+
+function updateFact(){ updateResult(); }
+
+async function runExplain(){
+  if(!labState.patient||!labState.donor) return;
+  const btn=document.getElementById('explain-btn');
+  btn.disabled=true; btn.textContent='// ANALYZING...';
+  let zone=document.getElementById('ai-explain-zone');
+  zone.innerHTML=`<div class="ai-panel"><div class="ai-head"><div class="ai-pulse"></div><span class="ai-lbl">HEMOLEARN AI · <span class="ac">IMMUNOLOGY MODULE</span></span></div><div class="ai-body loading">SCANNING ANTIGEN-ANTIBODY INTERACTIONS...</div></div>`;
+  const txt=await askClaude(
+    [{role:'user',content:`Patient: ${labState.patient}, Donor: ${labState.donor}. Is this compatible? Explain ABO antigens, Rh factor, antibodies present, and cellular-level consequences of incompatibility. Make it engaging for a biology student. 3 paragraphs.`}],
+    'You are HemoLearn AI — expert hematology educator. Make blood science fascinating. Use analogies. Be precise and educational.'
+  );
+  zone.querySelector('.ai-body').className='ai-body';
+  zone.querySelector('.ai-body').textContent=txt;
+  btn.disabled=false; btn.textContent='// EXPLAIN IMMUNOLOGY WITH AI';
+  gsap.from('.ai-panel',{opacity:0,y:10,duration:.4});
+}
+
+function renderChatMsgs(){
+  const el=document.getElementById('chat-msgs'); if(!el) return;
+  el.innerHTML='';
+  chatHistory.forEach(m=>{
+    const div=document.createElement('div');
+    div.className=`msg ${m.r}`; div.textContent=m.t;
+    el.appendChild(div);
+  });
+  el.scrollTop=el.scrollHeight;
+}
+
+async function sendChat(){
+  const inp=document.getElementById('chat-input');
+  const btn=document.getElementById('send-btn');
+  const q=inp.value.trim(); if(!q) return;
+  inp.value=''; inp.disabled=true; btn.disabled=true;
+  chatHistory.push({r:'u',t:q});
+  renderChatMsgs();
+  // Typing indicator
+  chatHistory.push({r:'a typing',t:'...'});
+  renderChatMsgs();
+  const ctx=labState.patient?`Context: Patient=${labState.patient}${labState.donor?', Donor='+labState.donor:''}.`:'';
+  const txt=await askClaude([{role:'user',content:`${ctx} Student: ${q}`}],
+    'You are HemoLearn AI. Answer blood science questions in ≤110 words. Be precise and educational. Occasionally use 1 emoji.');
+  chatHistory.pop(); // remove typing
+  chatHistory.push({r:'a',t:txt});
+  renderChatMsgs();
+  inp.disabled=false; btn.disabled=false; inp.focus();
+}
+
+// ═══════════════════════════════════════════════════════
+// CRISIS DASHBOARD
+// ═══════════════════════════════════════════════════════
+let crisisState={sel:null,region:'All',animated:false};
+const REGIONS=['All','Asia','Africa','Americas','Europe','MidEast'];
+const REGION_MAP={Pakistan:'Asia',Ethiopia:'Africa',Nigeria:'Africa',Bangladesh:'Asia','DR Congo':'Africa',Tanzania:'Africa',Uganda:'Africa',Mozambique:'Africa',Myanmar:'Asia',Afghanistan:'Asia',Haiti:'Americas',Yemen:'MidEast',Sudan:'Africa',Cambodia:'Asia',Bolivia:'Americas',Guatemala:'Americas',Indonesia:'Asia',Philippines:'Asia',India:'Asia',Brazil:'Americas',Mexico:'Americas','South Africa':'Africa',Turkey:'Europe',Iran:'MidEast',China:'Asia',Japan:'Asia',UK:'Europe',Germany:'Europe',France:'Europe',USA:'Americas'};
+const barColor=s=>s>70?'#c0392b':s>40?'#e67e22':s>15?'#f1c40f':'#00d68f';
+
+function renderCrisis(){
+  const main=document.getElementById('main-content');
+  main.innerHTML=`
+  <div class="page">
+    <div class="pg-head">
+      <div class="pg-title"><span class="t-dim">SYS://</span><span class="t-blood">BLOOD</span><span class="t-dim">_</span><span class="t-cyber">CRISIS</span></div>
+      <div class="pg-sub">30 COUNTRIES · REAL WHO-SOURCED DATA · LEARN DATA SCIENCE THROUGH A GLOBAL EMERGENCY</div>
+    </div>
+    <div class="map-wrap">
+      <canvas id="world-canvas"></canvas>
+      <div class="map-tip" id="map-tip"></div>
+      <div class="map-legend">
+        ${[['Critical >70%','#c0392b'],['High 40-70%','#e67e22'],['Moderate','#f1c40f'],['Low <15%','#00d68f']].map(([l,c])=>`<div class="legend-row"><div class="leg-dot" style="background:${c}"></div>${l}</div>`).join('')}
+      </div>
+    </div>
+    <div id="sel-country-zone"></div>
+    <div class="crisis-grid">
+      <div>
+        <div class="rfilter" id="region-filter"></div>
+        <div class="panel" style="padding:1.25rem" id="bars-panel">
+          <div class="slbl">Shortage by Country · Severity Ranked</div>
+          <div id="bars-container"></div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:1.25rem">
+        <div class="panel" style="padding:1.4rem">
+          <div class="slbl">Global Supply Gap</div>
+          <div class="stat-big blood">118.5M</div><div class="stat-lbl">Units needed globally / year</div>
+          <div class="divider"></div>
+          <div class="stat-big cyber">92M</div><div class="stat-lbl">Units collected globally / year</div>
+          <div class="deficit-box">
+            <div class="stat-big blood" style="font-size:2rem">72,603</div>
+            <div class="stat-lbl" style="margin-top:3px">Units short every single day</div>
+          </div>
+        </div>
+        <div class="panel" style="padding:1.25rem">
+          <div class="slbl">AI Data Science Analysis</div>
+          <p style="font-family:var(--mono);font-size:.7rem;color:var(--text3);line-height:1.65;margin-bottom:.9rem">IDENTIFY PATTERNS → FIND ROOT CAUSES → DESIGN AI INTERVENTIONS</p>
+          <button class="xbtn" onclick="runCrisisAI()" id="crisis-ai-btn">// RUN AI ANALYSIS</button>
+          <div id="crisis-ai-zone"></div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+  buildRegionFilter();
+  buildBars();
+  initWorldMap();
+  gsap.from('.panel',{opacity:0,y:20,duration:.5,stagger:.08,ease:'power3.out'});
+  setTimeout(()=>{ animateBars(); crisisState.animated=true; },400);
+}
+
+function buildRegionFilter(){
+  const el=document.getElementById('region-filter'); if(!el) return;
+  REGIONS.forEach(r=>{
+    const btn=document.createElement('button');
+    btn.className=`rfbtn${crisisState.region===r?' on':''}`;
+    btn.textContent=r; btn.onclick=()=>{ crisisState.region=r; buildBars(); animateBars(); el.querySelectorAll('.rfbtn').forEach(b=>b.classList.toggle('on',b.textContent===r)); };
+    el.appendChild(btn);
+  });
+}
+
+function buildBars(){
+  const el=document.getElementById('bars-container'); if(!el) return;
+  const filtered=CRISIS.filter(d=>crisisState.region==='All'||REGION_MAP[d.c]===crisisState.region);
+  const sorted=[...filtered].sort((a,b)=>b.s-a.s);
+  el.innerHTML=sorted.map(d=>`
+    <div class="cbar${crisisState.sel===d.c?' sel':''}" onclick="selectCountry('${d.c}')">
+      <div class="cbar-flag">${d.f}</div>
+      <div class="cbar-name">${d.c}</div>
+      <div class="cbar-track"><div class="cbar-fill" data-shortage="${d.s}" style="width:0%;background:linear-gradient(90deg,${barColor(d.s)}99,${barColor(d.s)})"><span class="cbar-pct">${d.s}%</span></div></div>
+      <div class="cbar-need">${d.need}M</div>
+    </div>`).join('');
+}
+
+function animateBars(){
+  const fills=document.querySelectorAll('.cbar-fill');
+  fills.forEach((f,i)=>{
+    const target=f.dataset.shortage+'%';
+    gsap.fromTo(f,{width:'0%'},{width:target,duration:1.2,delay:i*.04,ease:'power3.out'});
+  });
+}
+
+function selectCountry(name){
+  crisisState.sel=crisisState.sel===name?null:name;
+  buildBars();
+  animateBars();
+  updateSelCard();
+}
+
+function updateSelCard(){
+  const z=document.getElementById('sel-country-zone'); if(!z) return;
+  if(!crisisState.sel){ z.innerHTML=''; return; }
+  const d=CRISIS.find(x=>x.c===crisisState.sel);
+  const col=barColor(d.s);
+  z.innerHTML=`
+    <div class="sel-card" style="border-color:${col}44;margin-bottom:1.25rem">
+      <div class="sel-flag">${d.f}</div>
+      <div class="sel-meta"><div class="sel-name" style="color:${col}">${d.c}</div><div class="sel-region">${REGION_MAP[d.c]||'—'}</div></div>
+      <div class="sel-shortage"><div class="sel-pct" style="color:${col}">${d.s}%</div><div class="sel-pct-lbl">Shortage</div></div>
+      <div class="sel-stats">
+        <div class="ssel"><div class="ssel-l">Needs</div><div class="ssel-v" style="color:#c0392b">${d.need}M</div></div>
+        <div class="ssel"><div class="ssel-l">Has</div><div class="ssel-v" style="color:#00d68f">${d.have}M</div></div>
+        <div class="ssel"><div class="ssel-l">Gap</div><div class="ssel-v" style="color:#e67e22">${(d.need-d.have).toFixed(2)}M</div></div>
+      </div>
+    </div>`;
+  gsap.from('.sel-card',{opacity:0,x:-16,duration:.35,ease:'power3.out'});
+}
+
+async function runCrisisAI(){
+  const btn=document.getElementById('crisis-ai-btn'); if(!btn) return;
+  btn.disabled=true; btn.textContent='// SCANNING DATA...';
+  const z=document.getElementById('crisis-ai-zone');
+  z.innerHTML=`<div class="ai-panel"><div class="ai-head"><div class="ai-pulse"></div><span class="ai-lbl">AI · <span class="ac">DATA SCIENCE MODULE</span></span></div><div class="ai-body loading">PROCESSING 30 COUNTRY DATASET...</div></div>`;
+  const top=CRISIS.sort((a,b)=>b.s-a.s).slice(0,6).map(d=>`${d.c}:${d.s}%`).join(', ');
+  const txt=await askClaude([{role:'user',content:`Blood shortage data for worst cases: ${top}. For STEM students: 1) What geographic/economic patterns exist? 2) Root causes? 3) How can AI and data science help solve this? Teach critical thinking, 3 paragraphs.`}],
+    'You are HemoLearn AI — data science and global health educator. Be insightful, inspire students to use STEM for real-world impact.');
+  z.querySelector('.ai-body').className='ai-body';
+  z.querySelector('.ai-body').textContent=txt;
+  btn.disabled=false; btn.textContent='// RUN AI ANALYSIS';
+}
+
+function initWorldMap(){
+  const canvas=document.getElementById('world-canvas');
+  if(!canvas) return;
+  const ctx=canvas.getContext('2d');
+  let W,H,dots=[],phase=0,hovered=null,raf;
+  function resize(){
+    W=canvas.width=canvas.offsetWidth;
+    H=canvas.height=canvas.offsetHeight;
+    buildDots();
+  }
+  function project(lat,lng){ return {x:(lng+180)/360*W, y:(90-lat)/180*H}; }
+  function buildDots(){
+    dots=CRISIS.map(d=>{
+      const {x,y}=project(d.lat,d.lng);
+      return {...d,px:x,py:y,scale:1};
+    });
+  }
+  function drawGrid(){
+    ctx.save();
+    for(let lat=-60;lat<=60;lat+=30){
+      const {y}=project(lat,0);
+      ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y);
+      ctx.strokeStyle=lat===0?'rgba(0,255,240,0.07)':'rgba(0,255,240,0.03)';
+      ctx.lineWidth=lat===0?1:.5; ctx.stroke();
+    }
+    for(let lng=-120;lng<=180;lng+=60){
+      const {x}=project(0,lng);
+      ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H);
+      ctx.strokeStyle='rgba(0,255,240,0.025)'; ctx.lineWidth=.5; ctx.stroke();
+    }
+    ctx.restore();
+  }
+  function drawDots(){
+    dots.forEach((d,i)=>{
+      const isSel=crisisState.sel===d.c;
+      const isHov=hovered===i;
+      d.scale+=(((isSel||isHov)?1.8:1)-d.scale)*.1;
+      const col=barColor(d.s);
+      const r=(3.5+d.s/18)*d.scale;
+      // Ripple
+      if(isSel||isHov){
+        [r+5,r+10].forEach((rr,ri)=>{
+          ctx.beginPath(); ctx.arc(d.px,d.py,rr+Math.sin(phase*3+i)*(ri+1)*2,0,Math.PI*2);
+          ctx.strokeStyle=col+(ri===0?'55':'22'); ctx.lineWidth=1.2; ctx.stroke();
+        });
+      }
+      // Glow
+      const g=ctx.createRadialGradient(d.px,d.py,0,d.px,d.py,r*3);
+      g.addColorStop(0,col+'55'); g.addColorStop(1,col+'00');
+      ctx.beginPath(); ctx.arc(d.px,d.py,r*3,0,Math.PI*2);
+      ctx.fillStyle=g; ctx.fill();
+      // Core
+      ctx.beginPath(); ctx.arc(d.px,d.py,r,0,Math.PI*2);
+      const cg=ctx.createRadialGradient(d.px-r*.3,d.py-r*.3,0,d.px,d.py,r);
+      cg.addColorStop(0,col+'ff'); cg.addColorStop(1,col+'bb');
+      ctx.fillStyle=cg; ctx.fill();
+      // Label
+      if(isSel||isHov){
+        ctx.save();
+        ctx.fillStyle='rgba(255,255,255,.9)';
+        ctx.font=`bold ${Math.max(9,10*d.scale*.75)}px Rajdhani,sans-serif`;
+        ctx.textAlign='center'; ctx.shadowColor='rgba(0,0,0,.9)'; ctx.shadowBlur=6;
+        ctx.fillText(d.c,d.px,d.py-r-6);
+        ctx.restore();
+      }
+    });
+  }
+  function loop(){
+    phase+=.015;
+    ctx.clearRect(0,0,W,H);
+    drawGrid(); drawDots();
+    raf=requestAnimationFrame(loop);
+  }
+  function hit(mx,my){
+    for(let i=dots.length-1;i>=0;i--){
+      const d=dots[i];
+      if(Math.hypot(mx-d.px,my-d.py)<(4+d.s/14)*2) return i;
+    }
+    return null;
+  }
+  canvas.addEventListener('mousemove',e=>{
+    const rect=canvas.getBoundingClientRect();
+    const sx=W/rect.width,sy=H/rect.height;
+    const mx=(e.clientX-rect.left)*sx, my=(e.clientY-rect.top)*sy;
+    hovered=hit(mx,my);
+    canvas.style.cursor=hovered!==null?'pointer':'default';
+    const tip=document.getElementById('map-tip'); if(!tip) return;
+    if(hovered!==null){
+      const d=CRISIS[hovered];
+      tip.style.opacity='1';
+      tip.style.left=(e.clientX-canvas.getBoundingClientRect().left+16)+'px';
+      tip.style.top=(e.clientY-canvas.getBoundingClientRect().top-20)+'px';
+      tip.innerHTML=`<div class="map-tip-name">${d.f} ${d.c}</div><div class="map-tip-row"><div class="tip-dot" style="background:${barColor(d.s)}"></div>${d.s}% shortage</div><div class="map-tip-row">Needs ${d.need}M · Has ${d.have}M units/yr</div>`;
+    } else { tip.style.opacity='0'; }
+  });
+  canvas.addEventListener('click',e=>{
+    const rect=canvas.getBoundingClientRect();
+    const mx=(e.clientX-rect.left)*(W/rect.width), my=(e.clientY-rect.top)*(H/rect.height);
+    const h=hit(mx,my);
+    if(h!==null){ selectCountry(CRISIS[h].c); }
+  });
+  const ro=new ResizeObserver(()=>{ clearTimeout(ro._t); ro._t=setTimeout(()=>{ resize(); },100); });
+  ro.observe(canvas.parentElement);
+  resize(); loop();
+  // Store raf for cleanup
+  canvas._raf=raf;
+}
+
+// ═══════════════════════════════════════════════════════
+// CASE SIMULATOR
+// ═══════════════════════════════════════════════════════
+let caseState={idx:0,answered:{},feedback:{}};
+
+function renderCases(){
+  const main=document.getElementById('main-content');
+  main.innerHTML=`
+  <div class="page">
+    <div class="pg-head">
+      <div class="pg-title"><span class="t-dim">SYS://</span><span class="t-blood">CLINICAL</span><span class="t-dim">_</span><span class="t-cyber">CASES</span></div>
+      <div class="pg-sub">8 REAL EMERGENCY SCENARIOS · LEARN THE DECISION-MAKING LOGIC THAT SAVES LIVES</div>
+    </div>
+    <div class="case-grid">
+      <div id="case-card-wrap"></div>
+      <div style="display:flex;flex-direction:column;gap:1rem">
+        <div class="panel" id="feedback-panel">
+          <div class="panel-head"><div class="ph-dot"></div><div class="ph-label">AI CLINICAL FEEDBACK · <span class="accent">LIVE</span></div></div>
+          <div style="padding:1.1rem 1.25rem;font-family:var(--body);font-size:.84rem;line-height:1.75;color:var(--text2);min-height:110px" id="feedback-body">
+            <span style="color:var(--text3);font-family:var(--mono);font-size:.7rem;font-style:italic">AWAITING RESPONSE...</span>
+          </div>
+        </div>
+        <div class="panel" style="padding:1.25rem">
+          <div class="slbl">Progress</div>
+          <div class="progress-dots" id="prog-dots"></div>
+          <div style="display:flex;gap:1.5rem;margin-top:1rem" id="score-row"></div>
+        </div>
+        <div class="panel" style="padding:1.25rem">
+          <div class="slbl">Topics</div>
+          <div class="chips" id="topics-chips"></div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+  renderCaseCard();
+  renderCasesSidebar();
+  gsap.from('.panel',{opacity:0,y:18,duration:.5,stagger:.08,ease:'power3.out'});
+}
+
+function renderCaseCard(){
+  const wrap=document.getElementById('case-card-wrap'); if(!wrap) return;
+  const c=CASES[caseState.idx];
+  const isDone=caseState.idx in caseState.answered;
+  const dc=c.diff==='Beginner'?'b':c.diff==='Intermediate'?'i':'a';
+  wrap.innerHTML=`
+    <div class="panel" style="padding:1.75rem" id="case-card">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:1.25rem;flex-wrap:wrap">
+        <span class="diff-tag ${dc}">${c.diff}</span>
+        <span style="font-family:var(--mono);font-size:.65rem;color:var(--text3);letter-spacing:1px">// ${c.tag}</span>
+        <span style="margin-left:auto;font-family:var(--mono);font-size:.68rem;color:var(--text3)">CASE ${caseState.idx+1}/${CASES.length}</span>
+      </div>
+      <div class="case-q">${c.q}</div>
+      <div id="opts-container">
+        ${c.opts.map((opt,i)=>{
+          let cls='opt';
+          if(isDone){ if(i===c.ans) cls+=' correct'; else if(i===caseState.answered[caseState.idx]&&i!==c.ans) cls+=' wrong'; }
+          return `<button class="${cls}" ${isDone?'disabled':''} onclick="chooseAnswer(${i})"><span class="opt-key">${String.fromCharCode(65+i)}</span><span>${opt}</span></button>`;
+        }).join('')}
+      </div>
+      ${isDone?`<div class="explanation"><strong>◈ CLINICAL EXPLANATION: </strong>${c.explain}</div>`:''}
+      <div class="case-footer">
+        <button class="case-nav-btn" onclick="navCase(${caseState.idx-1})" ${caseState.idx===0?'disabled':''}>◀ PREV</button>
+        <div class="score-display">SCORE: <strong>${Object.entries(caseState.answered).filter(([i,v])=>v===CASES[+i].ans).length}</strong>/${CASES.length}</div>
+        <button class="case-nav-btn" onclick="navCase(${caseState.idx+1})" ${caseState.idx===CASES.length-1||!isDone?'disabled':''}>NEXT ▶</button>
+      </div>
+    </div>`;
+}
+
+function renderCasesSidebar(){
+  // Progress dots
+  const dots=document.getElementById('prog-dots');
+  if(dots){
+    dots.innerHTML=CASES.map((_,i)=>{
+      let cls='pdot';
+      if(i===caseState.idx) cls+=' cur';
+      else if(i in caseState.answered) cls+=caseState.answered[i]===CASES[i].ans?' done':' wrong-done';
+      return `<div class="${cls}" onclick="navCase(${i})" title="Case ${i+1}"></div>`;
+    }).join('');
+  }
+  // Score row
+  const sr=document.getElementById('score-row');
+  if(sr){
+    const correct=Object.entries(caseState.answered).filter(([i,v])=>v===CASES[+i].ans).length;
+    const wrong=Object.keys(caseState.answered).length-correct;
+    const left=CASES.length-Object.keys(caseState.answered).length;
+    sr.innerHTML=[['✓',correct,'#00ff80','Correct'],['✗',wrong,'var(--blood3)','Wrong'],['○',left,'var(--text3)','Left']].map(([s,v,c,l])=>`<div><div style="font-family:var(--disp);font-size:1.8rem;color:${c}">${v}</div><div style="font-family:var(--mono);font-size:.62rem;color:var(--text3);text-transform:uppercase;letter-spacing:1px">${l}</div></div>`).join('');
+  }
+  // Topics
+  const tc=document.getElementById('topics-chips');
+  if(tc){
+    tc.innerHTML=CASES.map((cas,i)=>{
+      const cls=i in caseState.answered?(caseState.answered[i]===cas.ans?'chip g':'chip b'):'chip dim';
+      return `<span class="${cls}" style="cursor:pointer" onclick="navCase(${i})">${cas.tag}</span>`;
+    }).join('');
+  }
+  // Feedback
+  const fb=document.getElementById('feedback-body');
+  if(fb){
+    const isDone=caseState.idx in caseState.answered;
+    if(!isDone){
+      fb.innerHTML='<span style="color:var(--text3);font-family:var(--mono);font-size:.7rem;font-style:italic">AWAITING RESPONSE...</span>';
+    } else if(caseState.feedback[caseState.idx]){
+      fb.textContent=caseState.feedback[caseState.idx];
+    } else {
+      fb.innerHTML='<span style="color:var(--text3);font-family:var(--mono);font-size:.7rem;font-style:italic">GENERATING FEEDBACK...</span>';
+    }
+  }
+}
+
+async function chooseAnswer(opt){
+  const idx=caseState.idx;
+  if(idx in caseState.answered) return;
+  caseState.answered[idx]=opt;
+  renderCaseCard();
+  renderCasesSidebar();
+  // Get AI feedback
+  const c=CASES[idx];
+  const ok=opt===c.ans;
+  const txt=await askClaude(
+    [{role:'user',content:`Case: "${c.q}" Student chose: "${c.opts[opt]}". Correct answer: "${c.opts[c.ans]}". They were ${ok?'CORRECT':'WRONG'}. Teach "${c.tag}" in 65 words. Be warm and educational.`}],
+    'You are HemoLearn AI clinical educator. Give concise, encouraging, educational feedback.'
+  );
+  caseState.feedback[idx]=txt;
+  renderCasesSidebar();
+}
+
+function navCase(i){
+  if(i<0||i>=CASES.length) return;
+  caseState.idx=i;
+  renderCaseCard();
+  renderCasesSidebar();
+  gsap.fromTo('#case-card',{opacity:0,x:16},{opacity:1,x:0,duration:.35,ease:'power3.out'});
+}
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', ()=>{ goTab('home'); });
+</script>
+</body>
 </html>
