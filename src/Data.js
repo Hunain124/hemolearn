@@ -1,6 +1,3 @@
-// ═══════════════════════════════════════════
-// BLOOD GROUPS & COMPATIBILITY
-// ═══════════════════════════════════════════
 export const BLOOD_GROUPS = ["A+","A-","B+","B-","AB+","AB-","O+","O-"];
 
 export const COMPAT = {
@@ -25,9 +22,6 @@ export const FACTS = {
   "B-":  "2% of population. Extreme chronic worldwide shortage.",
 };
 
-// ═══════════════════════════════════════════
-// CRISIS DATA — 30 COUNTRIES
-// ═══════════════════════════════════════════
 export const CRISIS = [
   { c:"Pakistan",    f:"🇵🇰", s:88, need:1.8,  have:0.22, lat:30.3,  lng:69.3,  region:"Asia"     },
   { c:"Ethiopia",    f:"🇪🇹", s:91, need:0.6,  have:0.05, lat:9.1,   lng:40.5,  region:"Africa"   },
@@ -61,33 +55,38 @@ export const CRISIS = [
   { c:"USA",         f:"🇺🇸", s:2,  need:6.8,  have:6.66, lat:37.1,  lng:-95.7, region:"Americas" },
 ];
 
-// ═══════════════════════════════════════════
-// CLINICAL CASES
-// ═══════════════════════════════════════════
 export const CASES = [
-  { diff:"Beginner",     tag:"ABO Compatibility",       q:"Emergency: 7-year-old thalassemia patient (B+) needs blood urgently. Stock: B+, O+, O−. Which do you give first?",                                                                opts:["O− — universal donor","B+ — same group, ideal match","O+ — compatible for B+","Any works, no difference"],                                   ans:1, explain:"B+ is the ideal choice — identical ABO group and Rh type eliminates all compatibility risks. O+ works but repeated transfusions risk Rh alloimmunization. O− conserved for blood-type-unknown emergencies." },
-  { diff:"Beginner",     tag:"Universal Donor",          q:"Unconscious trauma patient arrives. No time for blood typing. Your protocol?",                                                                                                      opts:["Wait 10 minutes for typing","Give AB+ (universal recipient)","Give O− (universal donor)","Give O+ to conserve O−"],                           ans:2, explain:"O− is the universal donor — safe for ALL 8 blood types without prior testing. In life-threatening emergencies, O− is given immediately. It's the global standard for unknown-type emergency transfusion." },
-  { diff:"Intermediate", tag:"Rh Factor",                q:"Pregnant O− woman. Husband is O+. She's 28 weeks pregnant. What critical intervention is needed?",                                                                                 opts:["Nothing — same ABO group","Anti-D immunoglobulin (RhoGAM) injection","Emergency C-section preparation","Immediate fetal blood typing"],           ans:1, explain:"If baby inherited O+ from father, the mother's immune system creates Anti-D antibodies that cross the placenta and destroy fetal RBCs — Hemolytic Disease of Newborn. RhoGAM at 28 weeks prevents sensitization." },
-  { diff:"Intermediate", tag:"Blood Components",         q:"Hemophilia A patient (A+) is actively bleeding. What do you transfuse?",                                                                                                           opts:["Whole blood A+","Packed Red Blood Cells","Fresh Frozen Plasma / Factor VIII","Platelet concentrate"],                                             ans:2, explain:"Hemophilia A = Factor VIII deficiency. Treatment is FFP or Factor VIII concentrate — NOT red blood cells. Modern transfusion medicine uses component therapy targeting specific deficiencies." },
-  { diff:"Intermediate", tag:"Crossmatching",            q:"Lab detects an unexpected antibody in an A+ patient before surgery. Next step?",                                                                                                   opts:["Transfuse A+ immediately","Full crossmatch with donor blood","Give O− to be safe","Cancel transfusion"],                                           ans:1, explain:"Unexpected alloantibodies form after previous transfusions or pregnancies. Full crossmatch mixes patient serum with donor RBCs to detect reactions BEFORE transfusion — the critical final safety check." },
-  { diff:"Advanced",     tag:"Mass Casualty Protocol",   q:"40 trauma patients arrive simultaneously. Stock: 20 O−, 30 O+, limited A+/B+. No typing time. Protocol?",                                                                        opts:["O− to everyone","O+ to all adults","O+ to males/older women · O− to females under 50 + children","Type everyone first"],                           ans:2, explain:"O− (rare) conserved for women of childbearing age and children — Rh sensitization devastates future pregnancies. O+ given to males and post-menopausal women. Never delay transfusion in mass casualty." },
-  { diff:"Advanced",     tag:"Transfusion Reaction",     q:"Minutes after transfusion starts: fever, chills, severe back pain, dark urine. What's happening?",                                                                                opts:["Allergic — antihistamine + continue","Febrile non-hemolytic — slow drip","Acute hemolytic reaction — STOP IMMEDIATELY","Normal response — monitor"], ans:2, explain:"Dark urine + back pain + fever = ACUTE HEMOLYTIC TRANSFUSION REACTION — medical emergency. Incompatible RBCs destroyed intravascularly. STOP immediately, aggressive IV fluids. ABO mismatch can be fatal." },
-  { diff:"Advanced",     tag:"Prophylactic Transfusion", q:"Leukemia patient post-chemo: platelets 8,000/μL (normal 150,000+). Not actively bleeding. Do you transfuse?",                                                                    opts:["No — transfuse only if bleeding","Yes — prophylactic at <10,000/μL is standard protocol","Yes, but O+ matched only","Wait until 5,000/μL"],          ans:1, explain:"At 8,000/μL, spontaneous intracranial hemorrhage risk is real even without trauma. Standard protocol: prophylactic platelet transfusion at <10,000/μL. This threshold saves thousands of leukemia patients annually." },
+  { diff:"Beginner",     tag:"ABO Compatibility",       q:"Emergency: 7-year-old thalassemia patient (B+) needs blood urgently. Stock: B+, O+, O−. Which do you give first?",                  opts:["O− — universal donor","B+ — same group, ideal match","O+ — compatible for B+","Any works, no difference"],                                   ans:1, explain:"B+ is the ideal choice — identical ABO group and Rh type eliminates all compatibility risks. O+ works but repeated transfusions risk Rh alloimmunization. O− conserved for blood-type-unknown emergencies." },
+  { diff:"Beginner",     tag:"Universal Donor",          q:"Unconscious trauma patient arrives. No time for blood typing. Your protocol?",                                                        opts:["Wait 10 minutes for typing","Give AB+ (universal recipient)","Give O− (universal donor)","Give O+ to conserve O−"],                           ans:2, explain:"O− is the universal donor — safe for ALL 8 blood types without prior testing. In life-threatening emergencies, O− is given immediately. It's the global standard for unknown-type emergency transfusion." },
+  { diff:"Intermediate", tag:"Rh Factor",                q:"Pregnant O− woman. Husband is O+. She's 28 weeks pregnant. What critical intervention is needed?",                                    opts:["Nothing — same ABO group","Anti-D immunoglobulin (RhoGAM) injection","Emergency C-section preparation","Immediate fetal blood typing"],           ans:1, explain:"If baby inherited O+ from father, mother creates Anti-D antibodies destroying fetal RBCs — Hemolytic Disease of Newborn. RhoGAM at 28 weeks prevents sensitization." },
+  { diff:"Intermediate", tag:"Blood Components",         q:"Hemophilia A patient (A+) is actively bleeding. What do you transfuse?",                                                              opts:["Whole blood A+","Packed Red Blood Cells","Fresh Frozen Plasma / Factor VIII","Platelet concentrate"],                                             ans:2, explain:"Hemophilia A = Factor VIII deficiency. Treatment is FFP or Factor VIII concentrate — NOT RBCs. Modern transfusion medicine uses component therapy targeting specific deficiencies." },
+  { diff:"Intermediate", tag:"Crossmatching",            q:"Lab detects an unexpected antibody in an A+ patient before surgery. Next step?",                                                      opts:["Transfuse A+ immediately","Full crossmatch with donor blood","Give O− to be safe","Cancel transfusion"],                                           ans:1, explain:"Unexpected alloantibodies form after previous transfusions or pregnancies. Full crossmatch mixes patient serum with donor RBCs to detect reactions BEFORE transfusion — the critical final safety check." },
+  { diff:"Advanced",     tag:"Mass Casualty Protocol",   q:"40 trauma patients arrive simultaneously. Stock: 20 O−, 30 O+, limited A+/B+. No typing time. Protocol?",                          opts:["O− to everyone","O+ to all adults","O+ to males/older women · O− to females <50 + children","Type everyone first"],                           ans:2, explain:"O− (rare) conserved for women of childbearing age and children — Rh sensitization devastates future pregnancies. O+ given to males and post-menopausal women. Never delay transfusion in mass casualty." },
+  { diff:"Advanced",     tag:"Transfusion Reaction",     q:"Minutes after transfusion starts: fever, chills, severe back pain, dark urine. What's happening?",                                   opts:["Allergic — antihistamine + continue","Febrile non-hemolytic — slow drip","Acute hemolytic reaction — STOP IMMEDIATELY","Normal — monitor"],       ans:2, explain:"Dark urine + back pain + fever = ACUTE HEMOLYTIC TRANSFUSION REACTION. Stop immediately, aggressive IV fluids to protect kidneys. ABO mismatch can be fatal." },
+  { diff:"Advanced",     tag:"Prophylactic Transfusion", q:"Leukemia patient post-chemo: platelets 8,000/μL (normal 150,000+). Not actively bleeding. Do you transfuse?",                      opts:["No — transfuse only if bleeding","Yes — prophylactic at <10,000/μL is standard","Yes, but O+ matched only","Wait until 5,000/μL"],               ans:1, explain:"At 8,000/μL, spontaneous intracranial hemorrhage risk is real even without trauma. Prophylactic transfusion at <10,000/μL is standard protocol worldwide." },
 ];
 
-// ═══════════════════════════════════════════
-// CLAUDE API
-// ═══════════════════════════════════════════
+// ── CLAUDE API — direct browser call with required header ────────
 export async function askClaude(messages, system) {
   try {
-    const r = await fetch("https://api.anthropic.com/v1/messages", {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1000, system, messages }),
+      headers: {
+        "Content-Type": "application/json",
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true",
+      },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 1000,
+        system,
+        messages,
+      }),
     });
-    const d = await r.json();
+    const d = await res.json();
+    if (d.error) return `Error: ${d.error.message}`;
     return d.content?.[0]?.text || "No response.";
-  } catch {
-    return "Network error. Please try again.";
+  } catch (e) {
+    return `Network error: ${e.message}`;
   }
 }
